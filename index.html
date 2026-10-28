@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>decky-vite</title>
+  <link rel="stylesheet" href="/studio.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">
+      Decky Plugin
+      <span class="badge" id="plugin"></span>
+    </div>
+    <span class="group-label at-frame-label">Frame</span>
+    <button class="tool at-frame" id="frame" title="Show the device around the screen" aria-label="Show the frame">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <rect x="1" y="3.5" width="14" height="9" rx="3" /><rect x="5" y="5.5" width="6" height="5" />
+      </svg>
+    </button>
+    <div class="segments at-devices" id="devices"></div>
+    <span class="group-label at-scale-label">Scale</span>
+    <button class="tool at-physical" id="physical" title="Show the screen at its physical size, else fit it to the window">Physical</button>
+    <button class="tool at-reload" id="reload" title="Reload the screen">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" /><path d="M12.5 1.5v3h-3" />
+      </svg>
+      <span>Reload</span>
+    </button>
+    <div class="status" id="status"><span class="dot"></span><span id="status-text"></span></div>
+    <div class="facts at-screen" id="screen-facts"></div>
+    <div class="facts at-mac" id="mac-facts"></div>
+  </header>
+  <main class="stage" id="stage">
+    <div class="sizer">
+      <div class="slot" id="slot">
+        <div class="device" id="device">
+          <svg id="sketch" xmlns="http://www.w3.org/2000/svg"></svg>
+          <iframe id="screen" title="Device screen"></iframe>
+        </div>
+      </div>
+      <div class="legend" id="legend">
+        <div class="legend-title">Keyboard shortcuts</div>
+        <div class="legend-keys">
+          <span><kbd>←↑↓→</kbd>D-pad</span>
+          <span><kbd>⏎</kbd>A</span>
+          <span><kbd>esc</kbd>B</span>
+          <span><kbd>X</kbd><kbd>Y</kbd></span>
+          <span><kbd>[</kbd><kbd>]</kbd>L1 R1</span>
+          <span><kbd>Q</kbd>Quick Access</span>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="/studio.ts"></script>
+</body>
+</html>

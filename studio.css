@@ -1,0 +1,118 @@
+/* The studio around the device's screen. Neutral greys keep Steam's blues to the screen: dark
+   bars, a lighter anthracite stage. */
+:root {
+  --heading: 22px; --body: 18px; --meta: 17px; --label: 14px;
+  --bg: #0b0c0e; --panel: #15161a; --stage: #2a2c31; --raised: #22232a; --line: #2a2b31; --ink: #e8e8ec;
+  --dim: #9597a1; --accent: #5b9dff; --ok: #3fbf6f; --warn: #e0a43a;
+}
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  display: flex; flex-direction: column; background: var(--panel); color: var(--ink);
+  font: var(--body) / 1.4 -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+
+/* Two rows on one grid: the title and the controls, then the status and the facts, each under
+   the control it describes. The columns: title, gap, the frame's label, button and devices, the
+   scale's label and choices, reload. */
+.bar {
+  flex: none; display: grid; grid-template-columns: auto 1fr repeat(6, auto); column-gap: 10px; row-gap: 2px;
+  padding: 12px 24px 10px; background: var(--panel); border-bottom: 1px solid var(--line);
+  box-shadow: 0 2px 12px #0006; z-index: 1;
+}
+/* The title, the badge, the labels and the buttons' text share one baseline. The icon buttons
+   centre on the segments. */
+.bar > * { grid-row: 1; align-self: baseline; }
+.bar > .tool { align-self: center; }
+.bar > .at-physical { align-self: baseline; }
+.brand { grid-column: 1; }
+.at-frame-label { grid-column: 3; }
+.at-frame { grid-column: 4; }
+.at-devices { grid-column: 5; }
+.at-scale-label { grid-column: 6; margin-left: 14px; }
+.at-physical { grid-column: 7; justify-self: center; }
+.at-reload { grid-column: 8; margin-left: 14px; }
+.bar > .status, .bar > .facts { grid-row: 2; align-self: baseline; }
+.status { grid-column: 1; }
+.at-screen { grid-column: 5; justify-self: center; }
+.at-mac { grid-column: 7; justify-self: center; }
+
+/* The badge sits 12 px after the title, on its baseline. */
+.brand { display: flex; align-items: baseline; gap: 10px; font-size: var(--heading); font-weight: 700; white-space: nowrap; }
+.badge {
+  margin-left: 2px; padding: 5px 10px; border-radius: 5px; background: #d9dbe0; color: #15161a;
+  font-size: var(--meta); font-weight: 600; text-box: trim-both cap alphabetic;
+}
+.badge:empty { display: none; }
+
+.group-label { font-size: var(--label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
+.segments { display: flex; padding: 4px; gap: 2px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); }
+.segments button, .tool {
+  height: 38px; padding: 0 15px; border: none; border-radius: 7px; background: none; color: var(--dim);
+  font-size: var(--meta); cursor: pointer; white-space: nowrap;
+}
+.segments button:hover, .tool:hover { color: var(--ink); }
+.segments button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 2px #0008; }
+.tool { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); }
+.tool[aria-pressed="true"] { color: var(--ink); border-color: #44464f; background: var(--raised); }
+.tool svg { width: 20px; height: 20px; }
+
+.status { display: flex; align-items: baseline; gap: 8px; font-size: var(--label); color: var(--dim); white-space: nowrap; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--dim); }
+.status[data-state="online"] .dot { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.status[data-state="offline"] .dot { background: var(--warn); }
+
+/* The stage scrolls when the device at its physical size is larger than the window. */
+.stage {
+  flex: 1; min-height: 0; overflow: auto;
+  background: radial-gradient(circle, #ffffff14 1px, transparent 1.5px) 0 0 / 24px 24px, var(--stage);
+}
+.sizer {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box;
+  width: max-content; min-width: 100%; height: max-content; min-height: 100%; padding: 40px;
+}
+.slot { position: relative; flex: none; }
+.device { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.device iframe { position: absolute; border: 0; background: #0e141b; }
+.device svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+  filter: drop-shadow(0 24px 48px #000a); }
+
+/* The sketch of the handheld. Its controls send their button to the screen. */
+.body { fill: #17181c; stroke: #3a3b42; stroke-width: 0.5; }
+.glass { fill: #000; }
+.control { cursor: pointer; }
+.control .part, .deco .part { fill: #25262b; stroke: #3c3d45; stroke-width: 0.4; transition: fill 120ms; }
+.control:hover .part { fill: #33343b; stroke: #6a6c76; }
+.control.pressed .part { fill: var(--accent); }
+.control text, .deco text { fill: #8e909a; font: 600 3.4px -apple-system, sans-serif; text-anchor: middle; dominant-baseline: central;
+  pointer-events: none; }
+.stick-cap { fill: #111215; stroke: #3c3d45; stroke-width: 0.4; pointer-events: none; }
+.pad { fill: #1e1f24; stroke: #34353c; stroke-width: 0.4; }
+
+/* The keys float under the device, 5 em below it, 1 em when the window is short. */
+.legend {
+  flex: none; max-width: 100%; box-sizing: border-box; padding: 14px 20px 16px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--panel); box-shadow: 0 8px 24px #0008;
+  font-size: var(--meta); color: var(--dim); white-space: nowrap;
+}
+.legend-title { margin-bottom: 10px; font-size: var(--label); font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--ink); }
+.legend-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
+kbd {
+  display: inline-block; min-width: 14px; margin-right: 8px; padding: 3px 8px; border-radius: 5px;
+  border: 1px solid #3a3b42; border-bottom-width: 2px; background: var(--raised); color: var(--ink);
+  font: 600 var(--label) / 1.3 -apple-system, sans-serif; text-align: center;
+}
+.facts b { font-weight: 700; }
+.facts { font-size: var(--label); color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* Narrow windows keep the controls and drop their captions. */
+@media (max-width: 1400px) {
+  .tool span { display: none; }
+  .at-scale-label, .at-reload { margin-left: 6px; }
+}
+@media (max-width: 1180px) {
+  .group-label { display: none; }
+}
