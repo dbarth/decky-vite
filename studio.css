@@ -1,9 +1,9 @@
 /* The studio around the device's screen. Neutral greys keep Steam's blues to the screen: dark
-   bars, a lighter anthracite stage. */
+   bars and a mid-grey stage. The handheld takes the colours of the frame picked in the bar. */
 :root {
-  --heading: 22px; --body: 18px; --meta: 17px; --label: 14px;
-  --bg: #0b0c0e; --panel: #15161a; --stage: #2a2c31; --raised: #22232a; --line: #2a2b31; --ink: #e8e8ec;
-  --dim: #9597a1; --accent: #5b9dff; --ok: #3fbf6f; --warn: #e0a43a;
+  --heading: 22px; --body: 18px; --meta: 17px; --option: 15px; --label: 14px;
+  --bg: #020203; --panel: #1f2025; --stage: #484b53; --raised: #34353c; --line: #3a3b42; --ink: #e8e8ec;
+  --dim: #9597a1; --label-ink: #aeb0b9; --off: #6f717b; --accent: #5b9dff; --ok: #3fbf6f; --warn: #e0a43a;
 }
 html, body { margin: 0; height: 100%; overflow: hidden; }
 body {
@@ -14,10 +14,11 @@ body {
 button { font: inherit; color: inherit; }
 
 /* Two rows on one grid: the title and the controls, then the status and the facts, each under
-   the control it describes. The columns: title, gap, the frame's label, button and devices, the
-   scale's label and choices, reload. */
+   the control it describes. The columns: title, gap, the frame's label and devices, the scale's
+   label and choices, reload. The second row holds the display's facts under the frame's label and
+   the frame's colours under the devices. */
 .bar {
-  flex: none; display: grid; grid-template-columns: auto 1fr repeat(6, auto); column-gap: 10px; row-gap: 2px;
+  flex: none; display: grid; grid-template-columns: auto 1fr repeat(5, auto); column-gap: 10px; row-gap: 8px;
   padding: 12px 24px 10px; background: var(--panel); border-bottom: 1px solid var(--line);
   box-shadow: 0 2px 12px #0006; z-index: 1;
 }
@@ -25,18 +26,20 @@ button { font: inherit; color: inherit; }
    centre on the segments. */
 .bar > * { grid-row: 1; align-self: baseline; }
 .bar > .tool { align-self: center; }
-.bar > .at-physical { align-self: baseline; }
 .brand { grid-column: 1; }
 .at-frame-label { grid-column: 3; }
-.at-frame { grid-column: 4; }
-.at-devices { grid-column: 5; }
-.at-scale-label { grid-column: 6; margin-left: 14px; }
-.at-physical { grid-column: 7; justify-self: center; }
-.at-reload { grid-column: 8; margin-left: 14px; }
-.bar > .status, .bar > .facts { grid-row: 2; align-self: baseline; }
+.at-devices { grid-column: 4; }
+.at-scale-label { grid-column: 5; margin-left: 14px; }
+.at-sizes { grid-column: 6; }
+.at-reload { grid-column: 7; margin-left: 14px; }
+/* The second row centres its facts and the frame's colours on one line. */
+.bar > .status, .bar > .facts, .bar > .swatches { grid-row: 2; align-self: center; }
 .status { grid-column: 1; }
-.at-screen { grid-column: 5; justify-self: center; }
-.at-mac { grid-column: 7; justify-self: center; }
+.at-screen { grid-column: 3 / 5; justify-self: start; }
+.at-frames { grid-column: 4; justify-self: end; }
+/* The scale's facts centre under its choices at no width: their text cannot widen the column and
+   move the choices. */
+.at-mac { grid-column: 6; justify-self: center; width: 0; display: flex; justify-content: center; }
 
 /* The badge sits 12 px after the title, on its baseline. */
 .brand { display: flex; align-items: baseline; gap: 10px; font-size: var(--heading); font-weight: 700; white-space: nowrap; }
@@ -46,16 +49,15 @@ button { font: inherit; color: inherit; }
 }
 .badge:empty { display: none; }
 
-.group-label { font-size: var(--label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); }
-.segments { display: flex; padding: 4px; gap: 2px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); }
+.group-label { font-size: var(--label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--label-ink); }
+.segments { display: flex; padding: 4px; gap: 2px; border-radius: 10px; background: var(--bg); }
 .segments button, .tool {
-  height: 38px; padding: 0 15px; border: none; border-radius: 7px; background: none; color: var(--dim);
-  font-size: var(--meta); cursor: pointer; white-space: nowrap;
+  height: 32px; padding: 0 14px; border: none; border-radius: 7px; background: none; color: var(--off);
+  font-size: var(--option); cursor: pointer; white-space: nowrap;
 }
 .segments button:hover, .tool:hover { color: var(--ink); }
 .segments button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 2px #0008; }
 .tool { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); }
-.tool[aria-pressed="true"] { color: var(--ink); border-color: #44464f; background: var(--raised); }
 .tool svg { width: 20px; height: 20px; }
 
 .status { display: flex; align-items: baseline; gap: 8px; font-size: var(--label); color: var(--dim); white-space: nowrap; }
@@ -78,17 +80,70 @@ button { font: inherit; color: inherit; }
 .device svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
   filter: drop-shadow(0 24px 48px #000a); }
 
+/* The handheld's colours, by the frame picked in the bar. --hover brightens a control under the
+   mouse; --a, --b, --x and --y colour the face buttons. */
+.device[data-frame="black"] {
+  --body: #17181c; --body-line: #3a3b42; --part: #25262b; --part-line: #3c3d45; --hover: 1.35;
+  --hover-line: #6a6c76; --label: #8e909a; --stick: #111215; --pad: #1e1f24; --pad-line: #34353c;
+}
+.device[data-frame="white"] {
+  --body: #e6e7eb; --body-line: #b4b8c1; --part: #f3f4f6; --part-line: #b9bdc6; --hover: 0.95;
+  --hover-line: #8a8f9b; --label: #5a5e68; --stick: #f7f8f9; --pad: #d3d5db; --pad-line: #b4b8c1;
+}
+/* A Super Famicom's warm greys, with its red A, yellow B, blue X and green Y. */
+.device[data-frame="16-bit"] {
+  --body: #d4cfc3; --body-line: #aaa496; --part: #a39e92; --part-line: #827d71; --hover: 1.08;
+  --hover-line: #5f5b52; --label: #3d3a33; --stick: #e2ded3; --pad: #bdb8ab; --pad-line: #9b968a;
+  --a: #d22d2d; --b: #f0c419; --x: #2c5bb8; --y: #2b9348; --face-label: #fff; --b-label: #3b3b44;
+}
+/* The GameCube's indigo, with its green A and red B. */
+.device[data-frame="indigo"] {
+  --body: #4a3f8c; --body-line: #362d6e; --part: #5b51a0; --part-line: #3a3175; --hover: 1.15;
+  --hover-line: #cfcbe3; --label: #d9d5f0; --stick: #6a60b0; --pad: #3f3580; --pad-line: #30286a;
+  --a: #1fa55a; --b: #d43b3b; --x: #cfcbe3; --y: #cfcbe3; --face-label: #fff; --x-label: #3a3175; --y-label: #3a3175;
+}
+
 /* The sketch of the handheld. Its controls send their button to the screen. */
-.body { fill: #17181c; stroke: #3a3b42; stroke-width: 0.5; }
+.body { fill: var(--body); stroke: var(--body-line); stroke-width: 0.5; }
 .glass { fill: #000; }
 .control { cursor: pointer; }
-.control .part, .deco .part { fill: #25262b; stroke: #3c3d45; stroke-width: 0.4; transition: fill 120ms; }
-.control:hover .part { fill: #33343b; stroke: #6a6c76; }
-.control.pressed .part { fill: var(--accent); }
-.control text, .deco text { fill: #8e909a; font: 600 3.4px -apple-system, sans-serif; text-anchor: middle; dominant-baseline: central;
+.control .part, .deco .part { fill: var(--part); stroke: var(--part-line); stroke-width: 0.4; transition: fill 120ms; }
+.control:hover .part { stroke: var(--hover-line); filter: brightness(var(--hover)); }
+.control text, .deco text { fill: var(--label); font: 600 3.4px -apple-system, sans-serif; text-anchor: middle; dominant-baseline: central;
   pointer-events: none; }
-.stick-cap { fill: #111215; stroke: #3c3d45; stroke-width: 0.4; pointer-events: none; }
-.pad { fill: #1e1f24; stroke: #34353c; stroke-width: 0.4; }
+.control[data-button="A"] .part { fill: var(--a, var(--part)); }
+.control[data-button="B"] .part { fill: var(--b, var(--part)); }
+.control[data-button="X"] .part { fill: var(--x, var(--part)); }
+.control[data-button="Y"] .part { fill: var(--y, var(--part)); }
+.control[data-button="A"] text { fill: var(--a-label, var(--face-label, var(--label))); }
+.control[data-button="B"] text { fill: var(--b-label, var(--face-label, var(--label))); }
+.control[data-button="X"] text { fill: var(--x-label, var(--face-label, var(--label))); }
+.control[data-button="Y"] text { fill: var(--y-label, var(--face-label, var(--label))); }
+.control.pressed .part { fill: var(--accent); }
+.stick-cap { fill: var(--stick); stroke: var(--part-line); stroke-width: 0.4; pointer-events: none; }
+.pad { fill: var(--pad); stroke: var(--pad-line); stroke-width: 0.4; }
+
+/* The frame's colours: low segments with a rounded square centred in each. The colours not picked
+   are dimmed. No frame shows a slash. */
+.swatches { display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--bg); font-size: var(--label); }
+.swatches button { display: flex; align-items: center; justify-content: center; height: 24px; padding: 0 7px;
+  border: none; border-radius: 6px; background: none; cursor: pointer; }
+.swatches button[aria-pressed="true"] { background: var(--raised); box-shadow: 0 1px 2px #0008; }
+.swatches button:not([aria-pressed="true"]) .swatch { opacity: 0.4; }
+.swatches button:not([aria-pressed="true"]):hover .swatch { opacity: 0.75; }
+.swatch { display: block; width: 14px; height: 14px; box-sizing: border-box; border-radius: 4px;
+  border: 1px solid #ffffff40; }
+.swatch[data-frame="none"] { background: linear-gradient(135deg, transparent 45%, var(--dim) 45% 55%, transparent 55%); }
+.swatch[data-frame="black"] { background: #000; }
+.swatch[data-frame="white"] { background: #e6e7eb; }
+/* The Super Famicom's face buttons: X on top, Y left, A right, B below. */
+.swatch[data-frame="16-bit"] {
+  background: radial-gradient(circle at 50% 24%, #2c5bb8 1.6px, transparent 2.1px),
+    radial-gradient(circle at 24% 50%, #2b9348 1.6px, transparent 2.1px),
+    radial-gradient(circle at 76% 50%, #d22d2d 1.6px, transparent 2.1px),
+    radial-gradient(circle at 50% 76%, #f0c419 1.6px, transparent 2.1px), #d4cfc3;
+}
+.swatch[data-frame="indigo"] { background: #4a3f8c; }
 
 /* The keys float under the device, 5 em below it, 1 em when the window is short. */
 .legend {

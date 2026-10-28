@@ -3,13 +3,13 @@
 decky-vite helps create Decky plugins by providing a fast feedback loop during development. It features:
 
 - a hot reload web view, powered by Vite's HMR;
-- a true-to-scale web view of a Steam Deck, Steam Deck OLED or Odin 2 Portal screen;
+- a true-to-scale web view of a Steam Deck, Steam Deck OLED, Odin 2 Portal or Retroid Pocket 5 screen;
 - emulated gamepad navigation;
 - local fixtures, or a direct link to the plugin's backend on a real console.
 
 The plugin's pages run inside fakes of Steam's game mode and of Decky.
 
-![ROM Library's Game Info for Arkanoid in decky-vite, on an Odin 2 Portal](assets/studio.png)
+![Tunic's page in ROM Library, in decky-vite on an indigo Odin 2 Portal](assets/studio.png)
 
 ## Install
 
@@ -32,7 +32,7 @@ The files go to `steam/`. Without them the screen uses Helvetica Neue and letter
 
     npm run dev -- --plugin ../my-plugin
 
-Open http://localhost:5199. The screen shows the plugin's first route on a Steam Deck. The bar above it shows the handheld's frame, picks the model, switches between the physical size and the window's, and reloads the screen. Set `DECKY_VITE_PLUGIN` in `.env` to drop `--plugin`.
+Open http://localhost:5199. The screen shows the plugin's first route on a Steam Deck. The bar above it picks the handheld's colours or no frame, picks the model, switches between the physical size and the window's, and reloads the screen. Set `DECKY_VITE_PLUGIN` in `.env` to drop `--plugin`.
 
 ## The backend: fixtures or a console
 
@@ -66,7 +66,7 @@ A call without arguments reads `97d170e1550eee4a.json`.
 - `--plugin <folder>`: the plugin, relative to the folder npm runs in.
 - `--device <[user@]host>`: the console that runs the backend, as user `deck` by default.
 - `--ssh="<options>"`: more ssh options, for example `--ssh="-o Port=2222"`. Your ssh config applies. The value starts with a dash and needs the `=`.
-- `--model <model>`: `deck` (default), `deck-oled` or `odin2-portal`.
+- `--model <model>`: `deck` (default), `deck-oled`, `odin2-portal` or `rp5`.
 - `--port <port>`: 5199 by default.
 - `--route <path>`: the page shown at start.
 - `--github`: `fetch-assets` takes the glyphs from GitHub.

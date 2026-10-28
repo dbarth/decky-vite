@@ -36,10 +36,15 @@ if (stored("model-setting", "") !== page.model) {
   store("model", page.model);
 }
 
+// The handheld's colours, or none to show the screen alone.
+const FRAMES: [string, string][] = [["none", "No frame"], ["black", "Black"], ["white", "White"],
+  ["16-bit", "16-bit"], ["indigo", "Indigo"]];
+const storedFrame = stored("frame", "white");
+
 const settings = {
   model: DEVICES[stored("model", "")] ? stored("model", "") : page.model,
   size: stored("size", "physical"),
-  frame: stored("frame", "on"),
+  frame: storedFrame === "off" ? "none" : FRAMES.some(([v]) => v === storedFrame) ? storedFrame : "white",
 };
 
 function send(button: string) {
@@ -81,10 +86,12 @@ function dpad(x: number, y: number) {
   ].join(""));
 }
 
-function face(x: number, y: number) {
+// The face buttons, Y on top as on an Xbox pad, else X on top as on a Nintendo one.
+function face(x: number, y: number, nintendo = false) {
   const button = (name: string, dx: number, dy: number) =>
     at(dx, dy, control(name, `<circle class="part" r="4.2"/>`, name));
-  return at(x, y, button("Y", 0, -7) + button("X", -7, 0) + button("B", 7, 0) + button("A", 0, 7));
+  return at(x, y, nintendo ? button("X", 0, -7) + button("Y", -7, 0) + button("A", 7, 0) + button("B", 0, 7)
+    : button("Y", 0, -7) + button("X", -7, 0) + button("B", 7, 0) + button("A", 0, 7));
 }
 
 function small(x: number, y: number, label: string, button = "") {
@@ -97,7 +104,7 @@ function shoulder(x: number, w: number, label: string) {
     `<text x="${x + w / 2}" y="${-SHOULDER / 2}">${label}</text>`);
 }
 
-// A generic handheld: the controls of the Odin's Portal layout or of the Steam Deck.
+// A generic handheld: the controls of the Odin's Portal layout, the Retroid's or the Steam Deck's.
 function draw(d: Device, screen: number[]) {
   const [w, h] = d.body;
   const side = (w - screen[0]) / 2;
@@ -111,6 +118,11 @@ function draw(d: Device, screen: number[]) {
     parts.push(stick(left, h * 0.3, 10), dpad(left, h * 0.67), face(right, h * 0.3), stick(right, h * 0.67, 10),
       small(left - 9, h - 7, "⧉"), small(left + 9, h - 7, "⌂"), small(right - 9, h - 7, "···", "QAM"),
       small(right + 9, h - 7, "≡"));
+  } else if (d.layout === "retroid") {
+    // Its sides are near half circles: the small buttons sit by the screen's corners.
+    parts.push(dpad(left, h * 0.3), stick(left, h * 0.68, 9), face(right, h * 0.3, d.nintendo),
+      stick(right, h * 0.68, 9), small(side - 6, 9, "⧉"), small(side - 6, h - 9, "⌂"),
+      small(w - side + 6, 9, "≡"), small(w - side + 6, h - 9, "···", "QAM"));
   } else {
     const pad = (x: number) => `<rect class="pad" x="${x - 17}" y="${h - 46}" width="34" height="34" rx="6"/>`;
     parts.push(stick(left + 14, 26, 11), dpad(left - 16, 54), pad(left), face(right + 16, 54), stick(right - 14, 26, 11),
@@ -140,7 +152,8 @@ let last = "";
 function layout() {
   const d = DEVICES[settings.model];
   const g = geometry(d);
-  const framed = settings.frame === "on";
+  const framed = settings.frame !== "none";
+  box.dataset.frame = settings.frame;
   const [cw, ch] = framed ? [d.body[0] * g.perMm, (d.body[1] + SHOULDER) * g.perMm] : d.css;
   // The stage pads the device by 40 px on each side; fitting leaves room for the legend.
   const em = parseFloat(getComputedStyle(legend).fontSize);
@@ -185,9 +198,11 @@ function space() {
   legend.style.marginTop = `${Math.min(5 * em, Math.max(em, free))}px`;
 }
 
-function segments(id: string, key: keyof typeof settings, options: [string, string][]) {
+function segments(id: string, key: keyof typeof settings, options: [string, string][], swatch = false) {
   const el = $(id);
-  el.innerHTML = options.map(([v, label]) => `<button data-value="${v}">${label}</button>`).join("");
+  el.innerHTML = options.map(([v, label]) => swatch
+    ? `<button data-value="${v}" title="${label}" aria-label="${label}"><span class="swatch" data-frame="${v}"></span></button>`
+    : `<button data-value="${v}">${label}</button>`).join("");
   const mark = () => el.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed",
     String(b.dataset.value === settings[key])));
   el.addEventListener("click", (e) => {
@@ -202,22 +217,9 @@ function segments(id: string, key: keyof typeof settings, options: [string, stri
   mark();
 }
 
+segments("frames", "frame", FRAMES, true);
 segments("devices", "model", Object.entries(DEVICES).map(([id, d]) => [id, d.name]));
-// A button that switches a setting between two values, pressed on the first.
-function toggle(id: string, key: keyof typeof settings, on: string, off: string) {
-  const button = $(id);
-  button.setAttribute("aria-pressed", String(settings[key] === on));
-  button.addEventListener("click", () => {
-    settings[key] = settings[key] === on ? off : on;
-    store(key, settings[key]);
-    button.setAttribute("aria-pressed", String(settings[key] === on));
-    layout();
-    frame.contentWindow?.focus();
-  });
-}
-
-toggle("frame", "frame", "on", "off");
-toggle("physical", "size", "physical", "fit");
+segments("sizes", "size", [["physical", "Physical"], ["fit", "Zoom"]]);
 
 $("reload").addEventListener("click", () => frame.contentWindow?.location.reload());
 

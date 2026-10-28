@@ -13,7 +13,7 @@ const USAGE = `Usage: npm run dev [-- options]
   --plugin <folder>         the Decky plugin, else DECKY_VITE_PLUGIN in .env
   --device <[user@]host>    run the backend there, as user deck by default; else replay fixtures
   --ssh="<options>"         more ssh options, e.g. --ssh="-o Port=2222"
-  --model <model>           deck (default), deck-oled or odin2-portal
+  --model <model>           deck (default), deck-oled, odin2-portal or rp5
   --port <port>             5199 by default
   --route <path>            the page shown at start
   --github                  fetch-assets: take the glyphs from GitHub, without a device`;
