@@ -9,6 +9,8 @@ decky-vite helps create Decky plugins by providing a fast feedback loop during d
 
 The plugin's pages run inside fakes of Steam's game mode and of Decky.
 
+![ROM Library's Game Info for Arkanoid in decky-vite, on an Odin 2 Portal](assets/studio.png)
+
 ## Install
 
 decky-vite needs Node 24. The true-to-scale view needs macOS, where Swift from the Xcode Command Line Tools reads the screen's size. Elsewhere the screen fits the window.
