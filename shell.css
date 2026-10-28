@@ -1,0 +1,240 @@
+/* Steam's game mode around the plugin. Sizes are CSS pixels of the device screen, measured on
+   1920x1080 captures of the Odin, where Steam draws 960x540 at a pixel ratio of 2. */
+html, body, #root { margin: 0; height: 100%; overflow: hidden; background: #0e141b; }
+body {
+  font-family: "Motiva Sans", "Helvetica Neue", Arial, sans-serif; font-size: 16px; color: #dcdedf;
+  -webkit-font-smoothing: antialiased; user-select: none;
+}
+* { box-sizing: border-box; }
+/* Steam keeps the default content-box: the plugin's elements on the screen get it. The harness's
+   own parts, with a dv- class, keep border-box. :where() leaves the plugin's rules the stronger. */
+:where(.dv-screen) :where(:not([class*="dv-"])) { box-sizing: content-box; }
+[data-focusable] { outline: none; scroll-margin: 24px; }
+
+.dv-screen { position: relative; width: 100%; height: 100%; overflow: hidden; }
+/* The route keeps the focus ring under the status bar and the footer. */
+.dv-route { position: absolute; inset: 0; isolation: isolate; }
+
+/* Steam's focus ring, from its CSS: FocusRing inside the FocusRingRoot, which sits at z-index 10000. */
+.dv-focusring {
+  position: absolute; z-index: 10000; pointer-events: none; outline-offset: 2px; outline: 2px solid hsla(0, 0%, 100%, 0.6);
+  animation: dv-ring-flash 0.5s ease, dv-ring-grow 0.4s ease, dv-ring-fade 0.4s ease, dv-ring-blink 1.2s ease-in-out 0.4s 20;
+}
+@keyframes dv-ring-flash { 0% { background-color: hsla(0, 0%, 100%, 0.08); } 100% { background-color: hsla(0, 0%, 100%, 0); } }
+@keyframes dv-ring-grow { 0% { outline: 12px solid; } 100% { outline: 2px solid; } }
+@keyframes dv-ring-fade { 0% { outline-color: hsla(0, 0%, 100%, 0); } 100% { outline-color: hsla(0, 0%, 100%, 0.6); } }
+@keyframes dv-ring-blink { 50% { opacity: 0.4; } }
+
+/* Pages run under the status bar, which lays a blurred veil over them. A page can fade the veil
+   with --gamepadui-header-background-opacity. */
+.dv-header {
+  position: absolute; top: 0; left: 0; right: 0; height: 40px; z-index: 10; display: flex; align-items: center;
+  font-size: 16px; color: #fff; opacity: var(--gamepadui-header-opacity);
+}
+.dv-header::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(100px);
+  opacity: var(--gamepadui-header-background-opacity);
+}
+.dv-usearch { flex: 1; align-self: stretch; display: flex; align-items: center; justify-content: flex-end; }
+.dv-header svg { width: 20px; height: 20px; }
+.dv-hicon { flex: none; width: 38px; display: flex; justify-content: center; }
+.dv-hbattery { flex: none; width: 48px; display: flex; justify-content: center; }
+.dv-clock { flex: none; width: 96px; text-align: center; }
+.dv-qambutton { flex: none; width: 62px; text-align: center; cursor: pointer; letter-spacing: 1px; color: #8b929a; }
+.dv-battery { width: 24px; height: 12px; border: 2px solid #fff; border-radius: 2px; position: relative; }
+.dv-battery::after { content: ""; position: absolute; inset: 1px; background: #5ba32b; }
+
+/* Pages scroll under the footer's blurred veil. */
+.dv-footer {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 42px; z-index: 10;
+  background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(100px);
+  display: flex; align-items: center; gap: 18px; padding: 0 27px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #fff;
+}
+.dv-fill { flex: 1; }
+.dv-hint { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.dv-button { width: 23px; height: 23px; }
+.dv-glyphtext {
+  display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff;
+  color: #0e141b; font-size: 13px; font-weight: 800; letter-spacing: 0;
+}
+
+.dv-library { padding: 64px 2.8vw; }
+.dv-libtitle { font-size: 24px; font-weight: 800; color: #fff; }
+
+/* DialogButton and DialogInput as measured on the device. Steam's rules outweigh a page's
+   padding, font size and box-shadow on a button: these selectors carry the same weight. */
+.DialogButton { display: block; width: 100%; border: none; font: inherit; text-align: center; cursor: pointer; }
+.DialogButton._DialogLayout.Secondary.Focusable, .DialogButton._DialogLayout.Primary.Focusable {
+  padding: 10px 24px; border-radius: 2px; background: rgba(255, 255, 255, 0.15); color: #dcdedf;
+  font-size: 16px; line-height: 20px;
+}
+.DialogButton._DialogLayout.Secondary.Focusable.gpfocus { background: #fff; color: #23262e; box-shadow: none; }
+/* Steam's sp.css: a Primary button is #1a9fff with white text on focus. */
+.DialogButton._DialogLayout.Primary.Focusable.gpfocus { background: #1a9fff; color: #fff; box-shadow: none; }
+.DialogButton:disabled { opacity: 0.5; cursor: default; }
+/* Steam's minimum width and box, with the weight of its rule: button.<class>.DialogButton. */
+button.Secondary.DialogButton, button.Primary.DialogButton { min-width: 160px; box-sizing: border-box; }
+.DialogInputLabelGroup { width: 100%; margin-bottom: 22px; }
+.DialogLabel { font-size: 13px; color: #8b929a; margin-bottom: 4px; text-transform: uppercase; }
+.DialogInput_Wrapper { display: flex; position: relative; align-items: center; }
+.DialogInput {
+  display: block; flex: 1 1 0%; min-width: 0; height: 20px; padding: 10px 16px; border: 0; border-radius: 0;
+  background: rgba(255, 255, 255, 0.1); color: #dcdedf; font: inherit; font-size: 16px; line-height: 20px;
+  outline: none;
+}
+.DialogInput::placeholder { color: #8b929a; font-style: italic; }
+.DialogInput.gpfocus { background: #fff; color: #000; }
+
+.dv-spinner { height: 100%; min-height: 120px; display: flex; align-items: center; justify-content: center; }
+.dv-throbber {
+  width: 48px; height: 48px; border-radius: 50%; border: 4px solid #ffffff22; border-top-color: #1a9fff;
+  animation: dv-spin 0.9s linear infinite;
+}
+@keyframes dv-spin { to { transform: rotate(360deg); } }
+
+.dv-tabs { position: relative; height: 100%; }
+/* The contents scroll under the tab row, which has no background of its own. Steam keeps a focused
+   item 116px from the top and 80px from the bottom. */
+.dv-tabcontent { position: absolute; inset: 0; overflow-y: auto; padding: 58px 2.8vw 40px;
+  scroll-padding: 116px 0 80px; }
+.dv-tabcontent [data-focusable] { scroll-margin: 0; }
+.dv-tabrow { position: absolute; top: 0; left: 0; right: 0; z-index: 2; height: 58px; display: flex;
+  align-items: center; padding: 0 2.8vw; }
+.dv-glyph { flex: none; width: 31.5px; height: auto; }
+/* The titles fade out over 24px next to L1 and R1. */
+.dv-tabtitles { flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: 2px;
+  padding-left: 24px; overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent); }
+.dv-tabtitle {
+  flex: none; padding: 6px 16px; border-radius: 64px; cursor: pointer; font-size: 12px; font-weight: 700;
+  line-height: 22px; letter-spacing: 0.5px; text-transform: uppercase; color: #dcdedf;
+  transition: background-color 0.1s, color 0.1s;
+}
+.dv-tabtitle.dv-active { background: rgba(255, 255, 255, 0.15); color: #fff; }
+.dv-tabtitle.gpfocus { background: #fff; color: #23262e; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.32); }
+
+/* Steam draws its modals under the status bar and the footer, which stay sharp and show the
+   modal's buttons. */
+.dv-modalhost { position: absolute; inset: 0; z-index: 9; }
+.dv-modalwrap {
+  position: absolute; inset: 0; background: #000b; display: flex; align-items: center; justify-content: center;
+}
+.dv-modal {
+  width: 520px; max-width: calc(100% - 64px); max-height: calc(100% - 96px); overflow: hidden;
+  padding: 24px 28px; border-radius: 4px; background: linear-gradient(#2a313b, #1f252e); box-shadow: 0 12px 48px #000;
+}
+.dv-modal.dv-full { width: calc(100% - 5.6vw); }
+.dv-dialogtitle { margin-bottom: 16px; font-size: 24px; font-weight: 700; color: #fff; }
+.dv-dialogtext { font-size: 16px; line-height: 1.4; color: #dcdedf; }
+.dv-dialogbuttons { display: flex; gap: 12px; margin-top: 24px; }
+.dv-dialogfooter { margin-top: 24px; }
+.dv-menuwrap { position: absolute; inset: 0; }
+.dv-menu {
+  position: absolute; min-width: 220px; padding: 6px 0; border-radius: 4px; background: #23262e;
+  box-shadow: 0 8px 32px #000c;
+}
+.dv-menuitem { padding: 10px 20px; font-size: 16px; line-height: 20px; color: #dcdedf; white-space: nowrap; cursor: pointer; }
+.dv-menuitem.gpfocus { background: #fff; color: #23262e; }
+.dv-menuitem.dv-disabled { opacity: 0.5; cursor: default; }
+.dv-menusep { height: 1px; margin: 6px 0; background: #ffffff1a; }
+
+.dv-qam {
+  position: absolute; top: 40px; right: 0; bottom: 40px; z-index: 20; width: 380px; display: flex;
+  background: #0e141b; box-shadow: -8px 0 32px #000c;
+}
+.dv-qamtabs { flex: none; width: 52px; padding-top: 12px; background: #0b0f14; display: flex; justify-content: center; }
+.dv-qamicon { width: 36px; height: 36px; border-radius: 4px; background: #23262e; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.dv-qampanel { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dv-qamtitle { flex: none; padding: 14px 16px 8px; }
+.dv-static-Title { font-size: 16px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
+.dv-qamcontent { flex: 1; overflow-y: auto; padding-bottom: 24px; }
+.dv-section { padding: 8px 16px; }
+.dv-sectiontitle {
+  font-size: 12px; font-weight: 700; color: #8b929a; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 8px 0 6px;
+}
+.dv-row + .dv-row { border-top: 1px solid #23262e; }
+.dv-field { padding: 8px 0; }
+.dv-focusrow { margin: 0 -16px; padding: 10px 16px; }
+.dv-focusrow.gpfocus { background: #3d4450; }
+/* Steam's gamepad UI pads a standard and a compact field by 10px, and a field without padding by 0. */
+.dv-focusrow[data-padding="none"] { padding-top: 0; padding-bottom: 0; }
+.dv-fieldrow { display: flex; align-items: center; gap: 12px; }
+.dv-label { flex: 1; font-size: 16px; color: #fff; }
+.dv-desc { font-size: 12px; line-height: 16px; color: #8b929a; margin-top: 4px; }
+.dv-wide + .dv-desc { margin-top: 6px; }
+/* Steam's sp.css: StandaloneFieldSeparator is a 1px line of white at 10%. */
+.dv-separator { height: 1px; background: rgba(255, 255, 255, 0.1); }
+
+/* Steam's page of settings, measured on the Properties of Counter-Strike 2: a 240px column of page
+   titles, and the shown page's rows in boxes on the right. The control of a row centres across its
+   label and description. */
+.dv-sidebar { position: absolute; inset: 0; display: flex; background: #1a1c21; }
+.dv-pagelist { flex: none; width: 240px; overflow-y: auto; padding-bottom: 40px; background: #2b2d33; }
+.dv-pagelisttitle { padding: 46px 24px 13px; font-size: 24px; font-weight: 700; line-height: 28px; color: #fff; }
+.dv-pageitem { height: 42px; padding: 0 24px; font-size: 16px; line-height: 42px; color: #b8bcbf; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.dv-pageitem.dv-active { color: #fff; box-shadow: inset 2px 0 #1a9fff;
+  background: linear-gradient(to right, rgba(26, 159, 255, 0.4), rgba(26, 159, 255, 0)); }
+.dv-pagesep { height: 1px; margin: 8px 24px; background: #ffffff1a; }
+.dv-pagebody { flex: 1; min-width: 0; overflow-y: auto; padding: 74px 27px 56px 26px; }
+.dv-pagebody .DialogHeader { margin-bottom: 20px; font-size: 24px; font-weight: 700; line-height: 28px; color: #fff; }
+.dv-pagebody .dv-field { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px;
+  margin: 0 0 5px; padding: 12px; border-radius: 2px; background: #23262e; }
+.dv-pagebody .dv-fieldrow { display: contents; }
+.dv-pagebody .dv-label { color: #dcdedf; }
+.dv-pagebody .dv-control { grid-column: 2; }
+.dv-pagebody .dv-field:has(.dv-desc) .dv-control { grid-row: 1 / span 2; }
+.dv-pagebody .dv-desc { grid-column: 1; margin-top: 4px; font-size: 12px; color: #b8bcbf; }
+.dv-pagebody .dv-focusrow.gpfocus { background: #3d4450; }
+.dv-toggle { position: relative; width: 38px; height: 22px; border-radius: 11px; background: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.15s; }
+.dv-toggle::after { content: ""; position: absolute; top: 0; left: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; box-shadow: -1px 0 5px rgba(0, 0, 0, 0.35); transition: left 0.15s; }
+.dv-toggle.dv-on { background: #1a9fff; }
+.dv-toggle.dv-on::after { left: 16px; }
+.dv-toggle.dv-disabled { opacity: 0.5; }
+.DialogButton._DialogLayout.Secondary.Focusable.dv-dropdown { display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; width: 250px; padding: 10px 18px; text-align: left; }
+.dv-qam .DialogButton._DialogLayout.Secondary.Focusable.dv-dropdown { width: 160px; }
+.dv-dropdownlabel { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.dv-dropdown svg { flex: none; width: 12px; height: 6px; }
+
+.dv-toasts { position: absolute; right: 16px; bottom: 56px; z-index: 40; display: flex; flex-direction: column; gap: 8px; }
+.dv-toast {
+  width: 300px; padding: 10px 14px; border-radius: 4px; background: #23262e; box-shadow: 0 6px 24px #000;
+  font-size: 13px; color: #dcdedf;
+}
+.dv-toast b { display: block; font-size: 14px; color: #fff; margin-bottom: 2px; }
+
+/* The other rows of a Quick Access panel, as Decky's components draw them. */
+.dv-spin { width: 1em; height: 1em; color: #fff; animation: dv-spin 0.9s linear infinite; }
+.dv-titlespin { margin-left: 8px; vertical-align: -2px; }
+.dv-static-PanelSectionTitle {
+  font-size: 12px; font-weight: 700; color: #8b929a; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 8px 0 6px;
+}
+.dv-static-Text { padding: 8px 0; font-size: 14px; color: #dcdedf; }
+.dv-icon { flex: none; display: flex; font-size: 18px; color: #fff; }
+.dv-fieldrow.dv-below { flex-direction: column; align-items: stretch; gap: 6px; }
+.dv-row:has(> [data-sep="none"]) + .dv-row { border-top: 0; }
+.dv-row:has(> [data-sep="thick"]) + .dv-row { border-top-width: 3px; }
+.dv-track { position: relative; height: 4px; margin: 16px 9px 8px; border-radius: 2px; background: rgba(255, 255, 255, 0.2);
+  cursor: pointer; }
+.dv-track.dv-disabled { opacity: 0.5; }
+.dv-trackfill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 2px; background: #1a9fff; }
+.dv-tick { position: absolute; top: 9px; width: 2px; height: 6px; margin-left: -1px; background: rgba(255, 255, 255, 0.35); }
+.dv-knob { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
+.dv-notchlabels { position: relative; height: 16px; margin: 10px 9px 0; font-size: 12px; color: #8b929a; }
+.dv-notchlabels span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.dv-notchlabels span:first-child { transform: none; }
+.dv-notchlabels span:last-child { transform: translateX(-100%); }
+.dv-progress { position: relative; height: 6px; margin-top: 8px; overflow: hidden; border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2); }
+.dv-progressfill { height: 100%; background: #1a9fff; transition: width 0.3s; }
+.dv-progress.dv-indeterminate .dv-progressfill { width: 30%; animation: dv-slide 1.2s ease-in-out infinite; }
+@keyframes dv-slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+.dv-progressinfo { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 13px; color: #8b929a; }

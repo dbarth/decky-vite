@@ -1,0 +1,25 @@
+{
+  "name": "decky-vite",
+  "version": "0.1.0",
+  "description": "Run a Decky plugin's pages in a browser with hot reload, around fakes of Steam and Decky",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "fetch-assets": "fetch-assets.ts"
+  },
+  "scripts": {
+    "dev": "node cli.ts dev",
+    "check": "tsc -p ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.1.2",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "typescript": "6.0.3",
+    "vite": "8.3.4"
+  }
+}
