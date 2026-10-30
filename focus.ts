@@ -223,6 +223,12 @@ export function move(dir: Dir) {
 // Gives the focus to the page when nothing has it: the preferred element, the first element of a
 // container marked data-autofocus once it has one, else the first of the top layer.
 export function claim() {
+  // The page removed the focused element: Steam's ring and the footer's hints go with it.
+  if (current && !current.isConnected) {
+    current = null;
+    drawRing(null);
+    listeners.forEach((l) => l());
+  }
   if (focused() && layer().contains(focused())) return;
   const all = targets();
   const auto = [...layer().querySelectorAll("[data-autofocus]")];
