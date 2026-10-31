@@ -67,12 +67,22 @@ function Library() {
   );
 }
 
+// Decky's view of an open plugin: its back button and the plugin's title in a row of Steam's Title
+// class, then the plugin's content. The tab column holds the plugin's tab alone. The back button
+// takes no focus here.
 function Qam({ plugin }: { plugin: Plugin }) {
   return (
     <div className="dv-qam" data-layer="">
-      <div className="dv-qamtabs"><span className="dv-qamicon">{plugin.icon}</span></div>
+      <div className="dv-qamtabs"><span className="dv-qamtab">{plugin.icon}</span></div>
       <div className="dv-qampanel">
-        <div className="dv-qamtitle">{plugin.titleView ?? plugin.name}</div>
+        <div className="dv-qamtitle dv-static-Title">
+          <span className="DialogButton _DialogLayout Secondary Focusable dv-qamback">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 8H2M8 2 2 8l6 6" />
+            </svg>
+          </span>
+          {plugin.titleView ?? <div className="dv-static-Title">{plugin.name}</div>}
+        </div>
         <div className="dv-qamcontent">{plugin.content}</div>
       </div>
     </div>
@@ -85,6 +95,8 @@ export function App({ plugin }: { plugin: Plugin }) {
   return (
     <div className="dv-screen">
       <div className="dv-route" data-layer="">{Route ? <Route /> : <Library />}</div>
+      {/* Steam veils the page under the open Quick Access menu. A click on the veil closes the menu. */}
+      <div className={s.qam ? "dv-veil dv-on" : "dv-veil"} onClick={() => setQam(false)} />
       <Header />
       <Footer />
       {s.qam && <Qam plugin={plugin} />}
