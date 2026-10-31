@@ -65,6 +65,13 @@ export function navigate(to: string) {
   afterRender(() => focused() || focusFirst());
 }
 
+// Steam's history.replace(): the new page takes the place of the one on screen, which B then skips.
+export function replace(to: string) {
+  shell.history[shell.history.length - 1] = { path: to, place: null };
+  changed();
+  afterRender(() => focused() || focusFirst());
+}
+
 // Steam focuses the element the page had when it was left.
 export function back() {
   if (shell.history.length > 1) shell.history.pop();

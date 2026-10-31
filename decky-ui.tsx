@@ -5,7 +5,7 @@ import {
   useState,
 } from "react";
 import { Dir, NodeProps, focus, focusFirst, focused, register, rendered } from "./focus";
-import { back, navigate, openModal, path, setQam } from "./shell";
+import { back, navigate, openModal, path, replace, setQam } from "./shell";
 import { runningApp } from "./steam";
 
 function useNode<T extends HTMLElement>(p: NodeProps, outer?: ForwardedRef<T>, autoFocus?: boolean) {
@@ -325,7 +325,9 @@ export const Router = {
     const app = runningApp();
     return app ? [app] : [];
   },
-  WindowStore: { GamepadUIMainWindowInstance: { m_history: { get location() { return { pathname: path() }; } } } },
+  WindowStore: {
+    GamepadUIMainWindowInstance: { m_history: { get location() { return { pathname: path() }; }, replace } },
+  },
   Navigate: navigate,
   NavigateBack: back,
   CloseSideMenus: () => setQam(false),
